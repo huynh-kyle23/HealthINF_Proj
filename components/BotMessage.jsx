@@ -16,6 +16,7 @@ const BotMessage = ({ message }) => {
     const getResponse = async () => {
       try {
         // Create a proper prompt
+  
         const prompt = {
           contents: [{
             parts: [{ text: message }],

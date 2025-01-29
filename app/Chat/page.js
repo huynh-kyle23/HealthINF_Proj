@@ -16,7 +16,7 @@ export default function Chatbot() {
         setMessages([
           <BotMessage
             key="0"
-            message="Hello! How can I help you today?"
+            message="Can you say: Hello I am here for you"
           />
         ]);
       } catch (error) {
