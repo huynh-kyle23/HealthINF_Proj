@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import {DotPattern} from "../components/magicui/dot-pattern";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -19,9 +19,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>{/* You can include meta tags, links, etc. here */}</head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Now the animated pattern is inside the body */}
+        <DotPattern>
+
+        </DotPattern>
         {children}
       </body>
     </html>
