@@ -8,3 +8,8 @@ export default async function handler(req, res) {
       res.status(500).json({ error: 'Failed to fetch lo-fi track' });
     }
   }
+
+  //Make a feature that is a dashboard on waht they need to do and what music they want to
+//Play for speicifc subjects
+
+//Visual feature to show progress in work visual representation coupled with audio representation of progress
