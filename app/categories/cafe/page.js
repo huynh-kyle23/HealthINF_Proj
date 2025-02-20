@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "../../../components/ui/sidebar";
-import { IconHome, IconMusic } from "@tabler/icons-react";
+import { Sidebar, SidebarBody } from "../../../components/ui/sidebar";
 
 export default function JamendoPlayer() {
   const [tracks, setTracks] = useState([]);
@@ -9,6 +8,7 @@ export default function JamendoPlayer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUserInitiated, setIsUserInitiated] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const audioRef = useRef(null);
 
   const clientId = process.env.NEXT_PUBLIC_API_KEY;
@@ -37,26 +37,22 @@ export default function JamendoPlayer() {
     fetchTracks();
   }, []);
 
-  // Update track when currentTrackIndex changes, but only attempt to play if user already interacted
   useEffect(() => {
     if (audioRef.current && tracks.length > 0) {
       audioRef.current.src = tracks[currentTrackIndex].audio;
       audioRef.current.load();
       if (isUserInitiated) {
-        audioRef.current
-          .play()
-          .catch((err) => console.error("Play failed:", err));
+        audioRef.current.play().catch((err) => console.error("Play failed:", err));
       }
     }
-  }, [currentTrackIndex, tracks, isUserInitiated]);
+  }, [currentTrackIndex, tracks.length]);
+  
 
   const handlePlay = () => {
     if (audioRef.current) {
       audioRef.current
         .play()
-        .then(() => {
-          setIsUserInitiated(true);
-        })
+        .then(() => setIsUserInitiated(true))
         .catch((err) => console.error("Play failed:", err));
     }
   };
@@ -85,38 +81,32 @@ export default function JamendoPlayer() {
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      {/* Sidebar */}
-      <Sidebar>
-        <SidebarBody>
-          <SidebarLink
-            link={{ href: "/", label: "Home", icon: <IconHome /> }}
-          />
-          <SidebarLink
-            link={{ href: "/music", label: "Music", icon: <IconMusic /> }}
-          />
-          {/* Add more SidebarLink components as needed */}
-        </SidebarBody>
-      </Sidebar>
+      <div
+        style={{
+          width: isSidebarCollapsed ? "60px" : "250px",
+          transition: "width 0.3s",
+          overflow: "hidden"
+        }}
+        onMouseEnter={() => setIsSidebarCollapsed(false)}
+        onMouseLeave={() => setIsSidebarCollapsed(true)}
+      >
+        <Sidebar>
+          <SidebarBody />
+        </Sidebar>
+      </div>
 
-      {/* Main content area */}
       <main style={{ flex: 1, padding: "2rem", fontFamily: "sans-serif" }}>
         <h1>Jamendo Music Player</h1>
         {currentTrack && (
           <div>
             <h2>{currentTrack.name}</h2>
             <p>Artist: {currentTrack.artist_name}</p>
-            <audio
-              ref={audioRef}
-              controls
-              style={{ width: "100%" }}
-              onEnded={handleNextTrack}
-            >
+            <audio controls ref={audioRef}>
               Your browser does not support the audio element.
             </audio>
-            {/* Show play button only if user hasn't started playback yet */}
-            {!isUserInitiated && <button onClick={handlePlay}>Play</button>}
-            <div>
+            <div style={{ marginTop: "1rem" }}>
               <button onClick={handlePrevTrack}>Previous</button>
+              <button onClick={handlePlay}>Play</button>
               <button onClick={handleNextTrack}>Next</button>
             </div>
           </div>

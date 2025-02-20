@@ -1,9 +1,7 @@
-"use client";;
+"use client";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { IconMenu2, IconX } from "@tabler/icons-react";
 
 const SidebarContext = createContext(undefined);
 
@@ -19,7 +17,7 @@ export const SidebarProvider = ({
   children,
   open: openProp,
   setOpen: setOpenProp,
-  animate = true
+  animate = true,
 }) => {
   const [openState, setOpenState] = useState(false);
 
@@ -27,38 +25,57 @@ export const SidebarProvider = ({
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
   return (
-    (<SidebarContext.Provider value={{ open, setOpen, animate: animate }}>
+    <SidebarContext.Provider value={{ open, setOpen, animate }}>
       {children}
-    </SidebarContext.Provider>)
+    </SidebarContext.Provider>
   );
 };
 
-export const Sidebar = ({
-  children,
-  open,
-  setOpen,
-  animate
-}) => {
+export const Sidebar = ({ children, open, setOpen, animate }) => {
   return (
-    (<SidebarProvider open={open} setOpen={setOpen} animate={animate}>
+    <SidebarProvider open={open} setOpen={setOpen} animate={animate}>
       {children}
-    </SidebarProvider>)
+    </SidebarProvider>
   );
 };
 
 export const SidebarBody = (props) => {
-  return (<>
-    <DesktopSidebar {...props} />
-    <MobileSidebar {...(props)} />
-  </>);
+  return (
+    <>
+      <DesktopSidebar {...props} />
+    </>
+  );
 };
 
-export const DesktopSidebar = ({ className, children, ...props }) => {
+export const DesktopSidebar = ({ className, ...props }) => {
   const { open, setOpen, animate } = useSidebar();
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState("");
+
+  const handleAddTask = () => {
+    if (newTask.trim() !== "") {
+      setTasks([...tasks, { text: newTask, completed: false }]);
+      setNewTask("");
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleAddTask();
+    }
+  };
+
+  const handleToggleTask = (index) => {
+    const updatedTasks = tasks.map((task, i) =>
+      i === index ? { ...task, completed: !task.completed } : task
+    );
+    setTasks(updatedTasks);
+  };
+
   return (
     <motion.div
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-white w-[300px] flex-shrink-0",
+        "h-full px-4 py-4 hidden md:flex md:flex-col bg-white flex-shrink-0 border-r shadow-lg",
         className
       )}
       animate={{
@@ -68,76 +85,86 @@ export const DesktopSidebar = ({ className, children, ...props }) => {
       onMouseLeave={() => setOpen(false)}
       {...props}
     >
-      {children}
-    </motion.div>
-  );
-};
+      <div className="flex-1">
+        <h2 className="text-lg font-semibold mb-4">
+          {open ? (
+            "To-Do List"
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h8m-8 6h16"
+              />
+            </svg>
+          )}
+        </h2>
+        <ul>
+          {tasks.map((task, index) => (
+            <li
+              key={index}
+              className="flex items-center mb-2 transition-all duration-300"
+            >
+              {open ? (
+                <>
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => handleToggleTask(index)}
+                    className="mr-2"
+                  />
+                  <span
+                    className={
+                      task.completed ? "line-through text-gray-500" : ""
+                    }
+                  >
+                    {task.text}
+                  </span>
+                </>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h8m-8 6h16"
+                  />
+                </svg>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-export const MobileSidebar = ({ className, children, ...props }) => {
-  const { open, setOpen } = useSidebar();
-  return (
-    <div
-      className={cn(
-        "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-white w-full",
-        className
-      )}
-      {...props}
-    >
-      <div className="flex justify-end z-20 w-full">
-        <IconMenu2
-          className="text-neutral-800 dark:text-neutral-200"
-          onClick={() => setOpen(!open)}
+      {/* Modified input container */}
+      <div
+        className={cn(
+          "mt-auto transition-all duration-300 w-full", 
+          open ? "opacity-100 visible" : "opacity-0 invisible h-0"
+        )}
+      >
+        <input
+          type="text"
+          value={newTask}
+          onChange={(e) => setNewTask(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="New task"
+          className="border rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ x: "-100%", opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: "-100%", opacity: 0 }}
-            transition={{
-              duration: 0.3,
-              ease: "easeInOut",
-            }}
-            className={cn(
-              "fixed h-full w-full inset-0 bg-white p-10 z-[100] flex flex-col justify-between",
-              className
-            )}
-          >
-            <div
-              className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
-              onClick={() => setOpen(!open)}
-            >
-              <IconX />
-            </div>
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-export const SidebarLink = ({
-  link,
-  className,
-  ...props
-}) => {
-  const { open, animate } = useSidebar();
-  return (
-    (<Link
-      href={link.href}
-      className={cn("flex items-center justify-start gap-2  group/sidebar py-2", className)}
-      {...props}>
-      {link.icon}
-      <motion.span
-        animate={{
-          display: animate ? (open ? "inline-block" : "none") : "inline-block",
-          opacity: animate ? (open ? 1 : 0) : 1,
-        }}
-        className="text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0">
-        {link.label}
-      </motion.span>
-    </Link>)
+    </motion.div>
   );
 };

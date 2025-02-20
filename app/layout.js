@@ -21,13 +21,14 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>{/* You can include meta tags, links, etc. here */}</head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
       >
-        {/* Now the animated pattern is inside the body */}
-        <DotPattern>
-
-        </DotPattern>
-        {children}
+        {/* Animated pattern as a background */}
+        <div className="fixed inset-0 -z-10">
+          <DotPattern />
+        </div>
+        {/* Main content */}
+        <div className="relative z-10">{children}</div>
       </body>
     </html>
   );
