@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";  // Import next/image
 
 const SidebarContext = createContext(undefined);
 
@@ -102,20 +103,15 @@ export const DesktopSidebar = ({ className, ...props }) => {
           {open ? (
             "To-Do List"
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
+            <>
+              {/* Replace dummy SVG with actual SVG */}
+              <Image
+                src="/interface-ui-check-box-checkbox-todo-list-svgrepo-com.svg"  // Path to your SVG file in the public folder
+                alt="Todo list icon"
+                width={24}
+                height={24}
               />
-            </svg>
+            </>
           )}
         </h2>
       </div>
@@ -150,20 +146,15 @@ export const DesktopSidebar = ({ className, ...props }) => {
                   </span>
                 </>
               ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h8m-8 6h16"
+                <>
+                  {/* You can add the same SVG here for the task list */}
+                  <Image
+                    src="/homework-svgrepo-com.svg" // Path to your SVG file in the public folder
+                    alt="Homework icon"
+                    width={24}
+                    height={24}
                   />
-                </svg>
+                </>
               )}
             </li>
           ))}
