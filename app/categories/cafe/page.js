@@ -17,7 +17,7 @@ export default function JamendoPlayer() {
     async function fetchTracks() {
       try {
         const res = await fetch(
-          `https://api.jamendo.com/v3.0/tracks/?client_id=${clientId}&format=json&fuzzytags=lounge&limit=10`
+          `https://api.jamendo.com/v3.0/tracks/?client_id=${clientId}&format=json&fuzzytags=lofi&limit=10`
         );
         if (!res.ok) {
           throw new Error("Failed to fetch tracks");
@@ -81,20 +81,10 @@ export default function JamendoPlayer() {
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      <div
-        style={{
-          width: isSidebarCollapsed ? "60px" : "250px",
-          transition: "width 0.3s",
-          overflow: "hidden"
-        }}
-        onMouseEnter={() => setIsSidebarCollapsed(false)}
-        onMouseLeave={() => setIsSidebarCollapsed(true)}
-      >
-        <Sidebar>
-          <SidebarBody />
-        </Sidebar>
-      </div>
-
+      <Sidebar open={!isSidebarCollapsed} setOpen={(open) => setIsSidebarCollapsed(!open)}>
+        <SidebarBody />
+      </Sidebar>
+  
       <main style={{ flex: 1, padding: "2rem", fontFamily: "sans-serif" }}>
         <h1>Jamendo Music Player</h1>
         {currentTrack && (
