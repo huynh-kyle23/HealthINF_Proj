@@ -28,6 +28,7 @@ export default function RootLayout({ children }) {
           <DotPattern />
         </div>
         {/* Main content */}
+        
         <div className="relative z-10">{children}</div>
       </body>
     </html>

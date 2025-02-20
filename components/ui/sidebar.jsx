@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const SidebarContext = createContext(undefined);
@@ -51,6 +51,10 @@ export const DesktopSidebar = ({ className, ...props }) => {
   const { open, setOpen, animate } = useSidebar();
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
+  // Create a ref for the scrollable container
+  const taskListRef = useRef(null);
+  // Create a ref to track the latest task item
+  const lastTaskRef = useRef(null);
 
   const handleAddTask = () => {
     if (newTask.trim() !== "") {
@@ -72,6 +76,13 @@ export const DesktopSidebar = ({ className, ...props }) => {
     setTasks(updatedTasks);
   };
 
+  // Scroll to the latest task whenever tasks are updated
+  useEffect(() => {
+    if (tasks.length > 0 && lastTaskRef.current) {
+      lastTaskRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [tasks]);
+
   return (
     <motion.div
       className={cn(
@@ -85,8 +96,9 @@ export const DesktopSidebar = ({ className, ...props }) => {
       onMouseLeave={() => setOpen(false)}
       {...props}
     >
-      <div className="flex-1">
-        <h2 className="text-lg font-semibold mb-4">
+      {/* Title section */}
+      <div className="flex-shrink-0 mb-4">
+        <h2 className="text-lg font-semibold">
           {open ? (
             "To-Do List"
           ) : (
@@ -106,10 +118,19 @@ export const DesktopSidebar = ({ className, ...props }) => {
             </svg>
           )}
         </h2>
-        <ul>
+      </div>
+
+      {/* Scrollable task list container */}
+      <div 
+        ref={taskListRef}
+        className="flex-1 overflow-y-auto"
+      >
+        <ul className="pr-1">
           {tasks.map((task, index) => (
             <li
               key={index}
+              // Add ref to the last item in the list
+              ref={index === tasks.length - 1 ? lastTaskRef : null}
               className="flex items-center mb-2 transition-all duration-300"
             >
               {open ? (
@@ -149,10 +170,10 @@ export const DesktopSidebar = ({ className, ...props }) => {
         </ul>
       </div>
 
-      {/* Modified input container */}
+      {/* Input section - fixed at bottom */}
       <div
         className={cn(
-          "mt-auto transition-all duration-300 w-full", 
+          "mt-2 pt-2 border-t flex-shrink-0 transition-all duration-300 w-full", 
           open ? "opacity-100 visible" : "opacity-0 invisible h-0"
         )}
       >

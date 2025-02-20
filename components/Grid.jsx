@@ -3,7 +3,7 @@ import React from 'react';
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { MagicCard } from "../components/magicui/magic-card";
-import { Music, Moon, BookOpen, Coffee, Star, Building } from 'lucide-react';
+import { Music, Moon, BookOpen, Coffee, Star, Building, Palmtree, CloudRainIcon, Library } from 'lucide-react';
 
 const categories = [
   {
@@ -13,20 +13,20 @@ const categories = [
     type: "SINGLES"
   },
   {
-    title: "Immersive Music",
-    icon: Music,
+    title: "Library",
+    icon: Library,
     description: "Focus-enhancing tracks",
     type: "SINGLES"
   },
   {
-    title: "Relax",
-    icon: Moon,
+    title: "Rainfall Bedroom",
+    icon: CloudRainIcon,
     description: "Calming atmospheres",
     type: "SINGLES"
   },
   {
-    title: "Sleep",
-    icon: Moon,
+    title: "Beach",
+    icon: Palmtree,
     description: "Restful soundscapes",
     type: "PLANS"
   },
