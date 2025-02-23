@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
       >
         {/* Animated pattern as a background */}
         <div className="fixed inset-0 -z-10">
-          <DotPattern />
+
         </div>
         {/* Main content */}
         

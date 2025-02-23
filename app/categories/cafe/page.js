@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
 export default function JamendoPlayer() {
   const [tracks, setTracks] = useState([]);
@@ -78,24 +79,84 @@ export default function JamendoPlayer() {
   const currentTrack = tracks[currentTrackIndex];
 
   return (
-  
-      <main style={{ flex: 1, padding: "2rem", fontFamily: "sans-serif" }}>
-        <h1>Jamendo Music Player</h1>
-        {currentTrack && (
-          <div>
-            <h2>{currentTrack.name}</h2>
-            <p>Artist: {currentTrack.artist_name}</p>
-            <audio controls ref={audioRef}>
+    <div className="relative min-h-screen w-full overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/CafeImg.png" // Make sure to add your café image to the public folder
+          alt="Cozy café interior"
+          fill
+          className="object-cover brightness-[0.85]"
+          priority
+        />
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/30" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
+        <div className="w-full max-w-2xl bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
+          {/* Timer-like display for track info */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-light text-white mb-4">
+              lofi café
+            </h1>
+            {currentTrack && (
+              <div className="text-white/90">
+                <h2 className="text-6xl font-bold mb-4 font-mono">
+                  {currentTrack.name.length > 20 
+                    ? currentTrack.name.substring(0, 20) + "..."
+                    : currentTrack.name}
+                </h2>
+                <p className="text-xl opacity-75">
+                  {currentTrack.artist_name}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Audio Controls */}
+          <div className="flex flex-col items-center gap-6">
+            <audio 
+              controls={false} // Hide default controls
+              ref={audioRef}
+              className="hidden" // Hide audio element
+            >
               Your browser does not support the audio element.
             </audio>
-            <div style={{ marginTop: "1rem" }}>
-              <button onClick={handlePrevTrack}>Previous</button>
-              <button onClick={handlePlay}>Play</button>
-              <button onClick={handleNextTrack}>Next</button>
+
+            {/* Custom Controls */}
+            <div className="flex items-center gap-6">
+              <button
+                onClick={handlePrevTrack}
+                className="text-white hover:text-white/75 transition-colors p-3 rounded-full bg-white/20 hover:bg-white/30"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 20L9 12L19 4V20Z M5 19V5" />
+                </svg>
+              </button>
+
+              <button
+                onClick={handlePlay}
+                className="text-white hover:text-white/75 transition-colors p-4 rounded-full bg-white/20 hover:bg-white/30"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10 8L28 20L10 32V8Z" />
+                </svg>
+              </button>
+
+              <button
+                onClick={handleNextTrack}
+                className="text-white hover:text-white/75 transition-colors p-3 rounded-full bg-white/20 hover:bg-white/30"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 4L15 12L5 20V4Z M19 5V19" />
+                </svg>
+              </button>
             </div>
           </div>
-        )}
-      </main>
-
+        </div>
+      </div>
+    </div>
   );
 }
