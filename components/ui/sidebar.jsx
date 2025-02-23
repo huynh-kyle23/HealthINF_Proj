@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";  // Import next/image
+import Image from "next/image";
 
 const SidebarContext = createContext(undefined);
 
@@ -21,12 +21,27 @@ export const SidebarProvider = ({
   animate = true,
 }) => {
   const [openState, setOpenState] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    const saved = localStorage.getItem('sidebarOpen');
+    if (saved !== null) {
+      setOpenState(JSON.parse(saved));
+    }
+  }, []);
 
   const open = openProp !== undefined ? openProp : openState;
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('sidebarOpen', JSON.stringify(open));
+    }
+  }, [open, isClient]);
+
   return (
-    <SidebarContext.Provider value={{ open, setOpen, animate }}>
+    <SidebarContext.Provider value={{ open, setOpen, animate, isClient }}>
       {children}
     </SidebarContext.Provider>
   );
@@ -49,13 +64,26 @@ export const SidebarBody = (props) => {
 };
 
 export const DesktopSidebar = ({ className, ...props }) => {
-  const { open, setOpen, animate } = useSidebar();
+  const { open, setOpen, animate, isClient } = useSidebar();
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
-  // Create a ref for the scrollable container
   const taskListRef = useRef(null);
-  // Create a ref to track the latest task item
   const lastTaskRef = useRef(null);
+
+  // Load tasks from localStorage after component mounts
+  useEffect(() => {
+    const savedTasks = localStorage.getItem('sidebarTasks');
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+    }
+  }, []);
+
+  // Save tasks to localStorage when they change
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('sidebarTasks', JSON.stringify(tasks));
+    }
+  }, [tasks, isClient]);
 
   const handleAddTask = () => {
     if (newTask.trim() !== "") {
@@ -77,7 +105,6 @@ export const DesktopSidebar = ({ className, ...props }) => {
     setTasks(updatedTasks);
   };
 
-  // Scroll to the latest task whenever tasks are updated
   useEffect(() => {
     if (tasks.length > 0 && lastTaskRef.current) {
       lastTaskRef.current.scrollIntoView({ behavior: "smooth" });
@@ -97,26 +124,22 @@ export const DesktopSidebar = ({ className, ...props }) => {
       onMouseLeave={() => setOpen(false)}
       {...props}
     >
-      {/* Title section */}
       <div className="flex-shrink-0 mb-4">
         <h2 className="text-lg font-semibold">
-          {open ? (
+          {!isClient || open ? (
             "To-Do List"
           ) : (
-            <>
-              {/* Replace dummy SVG with actual SVG */}
-              <Image
-                src="/interface-ui-check-box-checkbox-todo-list-svgrepo-com.svg"  // Path to your SVG file in the public folder
-                alt="Todo list icon"
-                width={24}
-                height={24}
-              />
-            </>
+            <Image
+              src="/interface-ui-check-box-checkbox-todo-list-svgrepo-com.svg"
+              alt="Todo list icon"
+              width={24}
+              height={24}
+              priority
+            />
           )}
         </h2>
       </div>
 
-      {/* Scrollable task list container */}
       <div 
         ref={taskListRef}
         className="flex-1 overflow-y-auto"
@@ -125,11 +148,10 @@ export const DesktopSidebar = ({ className, ...props }) => {
           {tasks.map((task, index) => (
             <li
               key={index}
-              // Add ref to the last item in the list
               ref={index === tasks.length - 1 ? lastTaskRef : null}
               className="flex items-center mb-2 transition-all duration-300"
             >
-              {open ? (
+              {!isClient || open ? (
                 <>
                   <input
                     type="checkbox"
@@ -146,22 +168,19 @@ export const DesktopSidebar = ({ className, ...props }) => {
                   </span>
                 </>
               ) : (
-                <>
-                  {/* You can add the same SVG here for the task list */}
-                  <Image
-                    src="/homework-svgrepo-com.svg" // Path to your SVG file in the public folder
-                    alt="Homework icon"
-                    width={24}
-                    height={24}
-                  />
-                </>
+                <Image
+                  src="/homework-svgrepo-com.svg"
+                  alt="Homework icon"
+                  width={24}
+                  height={24}
+                  priority
+                />
               )}
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Input section - fixed at bottom */}
       <div
         className={cn(
           "mt-2 pt-2 border-t flex-shrink-0 transition-all duration-300 w-full", 

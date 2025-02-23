@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Sidebar, SidebarBody } from "../../../components/ui/sidebar";
 
 export default function JamendoPlayer() {
   const [tracks, setTracks] = useState([]);
@@ -8,7 +7,6 @@ export default function JamendoPlayer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUserInitiated, setIsUserInitiated] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const audioRef = useRef(null);
 
   const clientId = process.env.NEXT_PUBLIC_API_KEY;
@@ -80,10 +78,6 @@ export default function JamendoPlayer() {
   const currentTrack = tracks[currentTrackIndex];
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <Sidebar open={!isSidebarCollapsed} setOpen={(open) => setIsSidebarCollapsed(!open)}>
-        <SidebarBody />
-      </Sidebar>
   
       <main style={{ flex: 1, padding: "2rem", fontFamily: "sans-serif" }}>
         <h1>Jamendo Music Player</h1>
@@ -102,6 +96,6 @@ export default function JamendoPlayer() {
           </div>
         )}
       </main>
-    </div>
+
   );
 }

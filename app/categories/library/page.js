@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Sidebar, SidebarBody } from "../../../components/ui/sidebar";
 
 export default function JamendoPlayer() {
   const [tracks, setTracks] = useState([]);
@@ -8,7 +7,6 @@ export default function JamendoPlayer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUserInitiated, setIsUserInitiated] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const audioRef = useRef(null);
 
   const clientId = process.env.NEXT_PUBLIC_API_KEY;
@@ -46,7 +44,6 @@ export default function JamendoPlayer() {
       }
     }
   }, [currentTrackIndex, tracks.length]);
-  
 
   const handlePlay = () => {
     if (audioRef.current) {
@@ -80,28 +77,22 @@ export default function JamendoPlayer() {
   const currentTrack = tracks[currentTrackIndex];
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <Sidebar open={!isSidebarCollapsed} setOpen={(open) => setIsSidebarCollapsed(!open)}>
-        <SidebarBody />
-      </Sidebar>
-  
-      <main style={{ flex: 1, padding: "2rem", fontFamily: "sans-serif" }}>
-        <h1>Jamendo Music Player</h1>
-        {currentTrack && (
-          <div>
-            <h2>{currentTrack.name}</h2>
-            <p>Artist: {currentTrack.artist_name}</p>
-            <audio controls ref={audioRef}>
-              Your browser does not support the audio element.
-            </audio>
-            <div style={{ marginTop: "1rem" }}>
-              <button onClick={handlePrevTrack}>Previous</button>
-              <button onClick={handlePlay}>Play</button>
-              <button onClick={handleNextTrack}>Next</button>
-            </div>
+    <>
+      <h1>Jamendo Music Player</h1>
+      {currentTrack && (
+        <div>
+          <h2>{currentTrack.name}</h2>
+          <p>Artist: {currentTrack.artist_name}</p>
+          <audio controls ref={audioRef}>
+            Your browser does not support the audio element.
+          </audio>
+          <div style={{ marginTop: "1rem" }}>
+            <button onClick={handlePrevTrack}>Previous</button>
+            <button onClick={handlePlay}>Play</button>
+            <button onClick={handleNextTrack}>Next</button>
           </div>
-        )}
-      </main>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
