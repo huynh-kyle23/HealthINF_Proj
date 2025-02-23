@@ -69,7 +69,7 @@ export const DesktopSidebar = ({ className, ...props }) => {
   const [newTask, setNewTask] = useState("");
   const taskListRef = useRef(null);
   const lastTaskRef = useRef(null);
-
+  const [isNewTaskAdded, setIsNewTaskAdded] = useState(false);
   // Load tasks from localStorage after component mounts
   useEffect(() => {
     const savedTasks = localStorage.getItem('sidebarTasks');
@@ -89,6 +89,7 @@ export const DesktopSidebar = ({ className, ...props }) => {
     if (newTask.trim() !== "") {
       setTasks([...tasks, { text: newTask, completed: false }]);
       setNewTask("");
+      setIsNewTaskAdded(true);
     }
   };
 
@@ -106,19 +107,23 @@ export const DesktopSidebar = ({ className, ...props }) => {
   };
 
   useEffect(() => {
-    if (tasks.length > 0 && lastTaskRef.current) {
+    if (isNewTaskAdded && tasks.length > 0 && lastTaskRef.current) {
       lastTaskRef.current.scrollIntoView({ behavior: "smooth" });
+      setIsNewTaskAdded(false);
     }
-  }, [tasks]);
+  }, [tasks, isNewTaskAdded]);
 
   return (
     <motion.div
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-white flex-shrink-0 border-r shadow-lg",
+        "fixed top-0 left-0 h-full px-4 py-4 flex flex-col bg-white flex-shrink-0 border-r shadow-lg z-50 transition-all duration-300",
         className
       )}
       animate={{
         width: animate ? (open ? "300px" : "60px") : "300px",
+      }}
+      initial={{
+        width: "60px",
       }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
@@ -142,9 +147,12 @@ export const DesktopSidebar = ({ className, ...props }) => {
 
       <div 
         ref={taskListRef}
-        className="flex-1 overflow-y-auto"
+        className={cn(
+          "flex-1 transition-all duration-300",
+          open ? "overflow-y-auto" : "overflow-hidden"
+        )}
       >
-        <ul className="pr-1">
+        <ul className={cn("pr-1", !open && "flex flex-col items-center")}>
           {tasks.map((task, index) => (
             <li
               key={index}

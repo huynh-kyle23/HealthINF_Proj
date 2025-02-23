@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import Image from "next/image"
 
 export default function JamendoPlayer() {
   const [tracks, setTracks] = useState([]);
@@ -8,6 +8,7 @@ export default function JamendoPlayer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUserInitiated, setIsUserInitiated] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
   const clientId = process.env.NEXT_PUBLIC_API_KEY;
@@ -56,6 +57,19 @@ export default function JamendoPlayer() {
     }
   };
 
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play()
+          .then(() => setIsUserInitiated(true))
+          .catch((err) => console.error("Play failed:", err));
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
   const handleNextTrack = () => {
     setCurrentTrackIndex((prevIndex) =>
       prevIndex === tracks.length - 1 ? 0 : prevIndex + 1
@@ -79,14 +93,15 @@ export default function JamendoPlayer() {
   const currentTrack = tracks[currentTrackIndex];
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative min-h-screen w-full">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 w-full h-full">
         <Image
-          src="/CafeImg.png" // Make sure to add your café image to the public folder
+          src="/CafeImg.png"
           alt="Cozy café interior"
-          fill
-          className="object-cover brightness-[0.85]"
+          layout="fill"
+          objectFit="cover"
+          quality={100}
           priority
         />
         {/* Overlay for better text readability */}
@@ -118,9 +133,10 @@ export default function JamendoPlayer() {
           {/* Audio Controls */}
           <div className="flex flex-col items-center gap-6">
             <audio 
-              controls={false} // Hide default controls
+              controls={false}
               ref={audioRef}
-              className="hidden" // Hide audio element
+              className="hidden"
+              onEnded={handleNextTrack}
             >
               Your browser does not support the audio element.
             </audio>
@@ -137,12 +153,18 @@ export default function JamendoPlayer() {
               </button>
 
               <button
-                onClick={handlePlay}
+                onClick={handlePlayPause}
                 className="text-white hover:text-white/75 transition-colors p-4 rounded-full bg-white/20 hover:bg-white/30"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M10 8L28 20L10 32V8Z" />
-                </svg>
+                {isPlaying ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10 8H15V24H10V8ZM17 8H22V24H17V8Z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10 8L28 20L10 32V8Z" />
+                  </svg>
+                )}
               </button>
 
               <button
