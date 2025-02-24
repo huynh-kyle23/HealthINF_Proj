@@ -125,16 +125,7 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
           quality={100}
           priority
         />
-         <div className="absolute top-4 right-4 z-20">
-         <AnimatedCircularProgressBar
-      max={100}
-      min={0}
-      value={value}
-      gaugePrimaryColor="rgb(79 70 229)"
-      gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
-    />
 
-         </div>
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/30" />
       </div>
