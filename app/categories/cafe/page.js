@@ -15,12 +15,6 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
   const audioRef = useRef(null);
 
   const clientId = process.env.NEXT_PUBLIC_API_KEY;
-
-  useEffect(() => {
-    if (tasks) {
-      console.log("Current tasks:", tasks);
-    }
-  }, [tasks]);
   useEffect(() => {
     async function fetchTracks() {
       try {

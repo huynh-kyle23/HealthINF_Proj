@@ -8,6 +8,8 @@ export default function CategoriesLayout({ children }) {
     const [isClient, setIsClient] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [value, setValue] = useState(0);
+    const [totalSeconds, setTotalSeconds] = useState(0);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
     useEffect(() => {
       setIsClient(true);
@@ -17,7 +19,19 @@ export default function CategoriesLayout({ children }) {
       }
       const savedTasks = localStorage.getItem('sidebarTasks');
       if (savedTasks) {
-        setTasks(JSON.parse(savedTasks));
+        const parsedTasks = JSON.parse(savedTasks);
+        setTasks(parsedTasks);
+        
+        // Initialize progress values if tasks exist
+        if (parsedTasks.length > 0) {
+          const task = parsedTasks[0];
+          const total = (parseInt(task.duration.hours || 0) * 60 + parseInt(task.duration.minutes || 0)) * 60;
+          const elapsed = parseInt(task.elapsedTime || 0);
+          
+          setTotalSeconds(total);
+          setElapsedSeconds(elapsed);
+          updateProgressValue(total, elapsed);
+        }
       }
     }, []);
   
@@ -33,17 +47,31 @@ export default function CategoriesLayout({ children }) {
       }
     }, [tasks, isClient]);
   
-    useEffect(() => {
-      const handleIncrement = (prev) => {
-        if (prev === 100) {
-          return 0;
-        }
-        return prev + 10;
-      };
-      setValue(handleIncrement);
-      const interval = setInterval(() => setValue(handleIncrement), 2000);
-      return () => clearInterval(interval);
-    }, []);
+    // Remove the increment effect that was just for demonstration
+    // useEffect(() => {
+    //   const handleIncrement = (prev) => {
+    //     if (prev === 100) {
+    //       return 0;
+    //     }
+    //     return prev + 10;
+    //   };
+    //   setValue(handleIncrement);
+    //   const interval = setInterval(() => setValue(handleIncrement), 2000);
+    //   return () => clearInterval(interval);
+    // }, []);
+  
+    const updateProgressValue = (total, elapsed) => {
+      if (total <= 0) {
+        setValue(0);
+        return;
+      }
+      
+      // Calculate percentage and ensure it doesn't exceed 100%
+      const percentage = Math.min(100, (elapsed / total) * 100);
+      setValue(percentage);
+      
+      console.log(`Progress: ${percentage.toFixed(1)}% (${elapsed}/${total} seconds)`);
+    };
   
     const handleSidebarToggle = (open) => {
       setIsSidebarCollapsed(!open);
@@ -51,7 +79,25 @@ export default function CategoriesLayout({ children }) {
   
     const handleTaskUpdate = (updatedTasks) => {
       setTasks(updatedTasks);
-      console.log("Tasks updated:", updatedTasks);
+      
+      if (updatedTasks.length > 0) {
+        // Get total duration in seconds
+        let total = parseInt(updatedTasks[0].duration.hours || 0) * 60;
+        total = total + parseInt(updatedTasks[0].duration.minutes || 0);
+        let total_seconds = total * 60;
+        
+        // Get elapsed time in seconds
+        let total_elapsed_time = parseInt(updatedTasks[0].elapsedTime || 0);
+        
+        // Update state values
+        setTotalSeconds(total_seconds);
+        setElapsedSeconds(total_elapsed_time);
+        
+        // Update progress bar
+        updateProgressValue(total_seconds, total_elapsed_time);
+        
+        console.log("Tasks updated:", total_seconds, "Elapsed Time:", total_elapsed_time);
+      }
     };
   
     return (
@@ -65,15 +111,29 @@ export default function CategoriesLayout({ children }) {
         
         <main style={{ flex: 1, padding: "2rem", fontFamily: "sans-serif", position: "relative" }}>
           <div className="absolute top-4 right-4 z-20">
-            <AnimatedCircularProgressBar
-              max={100}
-              min={0}
-              value={value}
-              gaugePrimaryColor="rgb(79 70 229)"
-              gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
-            />
+            <div className="flex flex-col items-center">
+              <AnimatedCircularProgressBar
+                max={100}
+                min={0}
+                value={value}
+                gaugePrimaryColor="rgb(79 70 229)"
+                gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
+              />
+              {totalSeconds > 0 && (
+                <div className="mt-1 text-xs text-gray-600">
+                  {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / 
+                  {Math.floor(totalSeconds / 60)}:{(totalSeconds % 60).toString().padStart(2, '0')}
+                </div>
+              )}
+            </div>
           </div>
-          {React.cloneElement(children, { tasks: tasks, onTaskUpdate: handleTaskUpdate })}
+          {React.cloneElement(children, { 
+            tasks: tasks, 
+            onTaskUpdate: handleTaskUpdate,
+            progressValue: value,
+            totalSeconds: totalSeconds,
+            elapsedSeconds: elapsedSeconds
+          })}
         </main>
       </div>
     );
