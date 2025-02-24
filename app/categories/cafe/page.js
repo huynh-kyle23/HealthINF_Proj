@@ -1,8 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { AnimatedCircularProgressBar } from "../../../components/magicui/animated-circular-progress-bar";
+
 import Image from "next/image"
 
 export default function JamendoPlayer() {
+  const [value, setValue] = useState(0);
   const [tracks, setTracks] = useState([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -46,6 +49,19 @@ export default function JamendoPlayer() {
       }
     }
   }, [currentTrackIndex, tracks.length]);
+
+  useEffect(() => {
+    const handleIncrement = (prev) => {
+      if (prev === 100) {
+        return 0;
+      }
+      return prev + 10;
+    };
+    setValue(handleIncrement);
+    const interval = setInterval(() => setValue(handleIncrement), 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   
 
   const handlePlay = () => {
@@ -104,6 +120,16 @@ export default function JamendoPlayer() {
           quality={100}
           priority
         />
+         <div className="absolute top-4 right-4 z-20">
+         <AnimatedCircularProgressBar
+      max={100}
+      min={0}
+      value={value}
+      gaugePrimaryColor="rgb(79 70 229)"
+      gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
+    />
+
+         </div>
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/30" />
       </div>

@@ -72,15 +72,18 @@ export const SidebarBody = (props) => {
   );
 };
 
-export const DesktopSidebar = ({ className, ...props }) => {
+export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
   const { open, setOpen, animate, isClient } = useSidebar();
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     name: "",
     duration: { hours: "", minutes: "" },
     breaks: "",
-    environment: categories[0].title
+    environment: categories[0].title,
+    elapsedTime: 0,
+    isRunning: false
   });
+
   const taskListRef = useRef(null);
   const lastTaskRef = useRef(null);
   const [isNewTaskAdded, setIsNewTaskAdded] = useState(false);
@@ -103,14 +106,18 @@ export const DesktopSidebar = ({ className, ...props }) => {
 
   const handleAddTask = () => {
     if (newTask.name.trim() !== "") {
-      setTasks([...tasks, { ...newTask }]);
+      const newTaskWithId = { ...newTask, id: Date.now() };
+      setTasks([...tasks, newTaskWithId]);
       setNewTask({
         name: "",
         duration: { hours: "", minutes: "" },
         breaks: "",
-        environment: categories[0].title
+        environment: categories[0].title,
+        elapsedTime: 0,
+        isRunning: false
       });
       setIsNewTaskAdded(true);
+      onTaskUpdate([...tasks, newTaskWithId]);
     }
   };
   const handleKeyPress = (e) => {
@@ -130,10 +137,32 @@ export const DesktopSidebar = ({ className, ...props }) => {
       setNewTask(prev => ({ ...prev, [name]: value }));
     }
   };
-  const handleDeleteTask = (index) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
+  const handleDeleteTask = (id) => {
+    const updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
+    onTaskUpdate(updatedTasks);
   };
+
+  const handleStartStop = (id) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.id === id ? { ...task, isRunning: !task.isRunning } : task
+      )
+    );
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.isRunning ? { ...task, elapsedTime: task.elapsedTime + 1 } : task
+        )
+      );
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
 
   useEffect(() => {
     if (isNewTaskAdded && tasks.length > 0 && lastTaskRef.current) {
@@ -191,12 +220,16 @@ export const DesktopSidebar = ({ className, ...props }) => {
               {!isClient || open ? (
                 <>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold">{task.name}</span>
-                    <button onClick={() => handleDeleteTask(index)} className="text-red-500">Delete</button>
+                  <span>{task.name}</span>
+                    <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
                   </div>
                   <div>Duration: {task.duration.hours}h {task.duration.minutes}m</div>
                   <div>Breaks: {task.breaks}</div>
                   <div>Environment: {task.environment}</div>
+                  <button onClick={() => handleStartStop(task.id)}>
+                    {task.isRunning ? 'Stop' : 'Start'}
+                  </button>
+                  <span>{formatTime(task.elapsedTime)}</span>
                 </>
               ) : (
                 <Image
@@ -281,3 +314,11 @@ export const DesktopSidebar = ({ className, ...props }) => {
     </motion.div>
   );
 };
+
+
+function formatTime(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}

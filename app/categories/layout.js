@@ -5,6 +5,7 @@ import { Sidebar, SidebarBody } from "../../components/ui/sidebar";
 export default function CategoriesLayout({ children }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  
 
   // Set up client-side state after mount
   useEffect(() => {
