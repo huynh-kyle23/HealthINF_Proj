@@ -47,19 +47,6 @@ export default function CategoriesLayout({ children }) {
       }
     }, [tasks, isClient]);
   
-    // Remove the increment effect that was just for demonstration
-    // useEffect(() => {
-    //   const handleIncrement = (prev) => {
-    //     if (prev === 100) {
-    //       return 0;
-    //     }
-    //     return prev + 10;
-    //   };
-    //   setValue(handleIncrement);
-    //   const interval = setInterval(() => setValue(handleIncrement), 2000);
-    //   return () => clearInterval(interval);
-    // }, []);
-  
     const updateProgressValue = (total, elapsed) => {
       if (total <= 0) {
         setValue(0);
