@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { Star, Library, CloudRainIcon, Palmtree, Building } from 'lucide-react'; // Import icons
+import { Star, Library, CloudRainIcon, Palmtree, Building } from 'lucide-react';
 
 const categories = [
   { title: "Cafe", icon: Star, description: "Peaceful ambient sounds", type: "SINGLES" },
@@ -64,17 +64,8 @@ export const Sidebar = ({ children, open, setOpen, animate }) => {
   );
 };
 
-export const SidebarBody = (props) => {
-  return (
-    <>
-      <DesktopSidebar {...props} />
-    </>
-  );
-};
-
-export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
+export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
   const { open, setOpen, animate, isClient } = useSidebar();
-  const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     name: "",
     duration: { hours: "", minutes: "" },
@@ -87,27 +78,19 @@ export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
   const taskListRef = useRef(null);
   const lastTaskRef = useRef(null);
   const [isNewTaskAdded, setIsNewTaskAdded] = useState(false);
-  
-
-  // Load tasks from localStorage after component mounts
-  useEffect(() => {
-    const savedTasks = localStorage.getItem('sidebarTasks');
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
-    }
-  }, []);
-
-  // Save tasks to localStorage when they change
-  useEffect(() => {
-    if (isClient) {
-      localStorage.setItem('sidebarTasks', JSON.stringify(tasks));
-    }
-  }, [tasks, isClient]);
 
   const handleAddTask = () => {
     if (newTask.name.trim() !== "") {
-      const newTaskWithId = { ...newTask, id: Date.now() };
-      setTasks([...tasks, newTaskWithId]);
+      const newTaskWithId = { 
+        ...newTask, 
+        id: Date.now(),
+        duration: {
+          hours: newTask.duration.hours || "0",
+          minutes: newTask.duration.minutes || "0"
+        }
+      };
+      onTaskUpdate([...tasks, newTaskWithId]);
+      console.log("New task added:", newTaskWithId);
       setNewTask({
         name: "",
         duration: { hours: "", minutes: "" },
@@ -117,9 +100,9 @@ export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
         isRunning: false
       });
       setIsNewTaskAdded(true);
-
     }
   };
+
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleAddTask();
@@ -137,31 +120,29 @@ export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
       setNewTask(prev => ({ ...prev, [name]: value }));
     }
   };
+
   const handleDeleteTask = (id) => {
     const updatedTasks = tasks.filter(task => task.id !== id);
-    setTasks(updatedTasks);
+    onTaskUpdate(updatedTasks);
   };
 
   const handleStartStop = (id) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.id === id ? { ...task, isRunning: !task.isRunning } : task
-      )
+    const updatedTasks = tasks.map(task => 
+      task.id === id ? { ...task, isRunning: !task.isRunning } : task
     );
+    onTaskUpdate(updatedTasks);
   };
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTasks(prevTasks => 
-        prevTasks.map(task => 
-          task.isRunning ? { ...task, elapsedTime: task.elapsedTime + 1 } : task
-        )
+      const updatedTasks = tasks.map(task => 
+        task.isRunning ? { ...task, elapsedTime: task.elapsedTime + 1 } : task
       );
+      onTaskUpdate(updatedTasks);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
-
+  }, [tasks, onTaskUpdate]);
 
   useEffect(() => {
     if (isNewTaskAdded && tasks.length > 0 && lastTaskRef.current) {
@@ -174,7 +155,7 @@ export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
     <motion.div
       className={cn(
         "fixed top-0 left-0 h-full px-4 py-4 flex flex-col bg-white flex-shrink-0 border-r shadow-lg z-50 transition-all duration-300",
-        className
+        props.className
       )}
       animate={{
         width: animate ? (open ? "400px" : "60px") : "400px",

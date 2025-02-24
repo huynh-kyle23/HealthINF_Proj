@@ -4,7 +4,7 @@ import { AnimatedCircularProgressBar } from "../../../components/magicui/animate
 
 import Image from "next/image"
 
-export default function JamendoPlayer() {
+export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
   const [value, setValue] = useState(0);
   const [tracks, setTracks] = useState([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
@@ -16,6 +16,11 @@ export default function JamendoPlayer() {
 
   const clientId = process.env.NEXT_PUBLIC_API_KEY;
 
+  useEffect(() => {
+    if (tasks) {
+      console.log("Current tasks:", tasks);
+    }
+  }, [tasks]);
   useEffect(() => {
     async function fetchTracks() {
       try {
