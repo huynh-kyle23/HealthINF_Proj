@@ -117,7 +117,7 @@ export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
         isRunning: false
       });
       setIsNewTaskAdded(true);
-      onTaskUpdate([...tasks, newTaskWithId]);
+
     }
   };
   const handleKeyPress = (e) => {
@@ -140,7 +140,6 @@ export const DesktopSidebar = ({ className, onTaskUpdate, ...props }) => {
   const handleDeleteTask = (id) => {
     const updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
-    onTaskUpdate(updatedTasks);
   };
 
   const handleStartStop = (id) => {
