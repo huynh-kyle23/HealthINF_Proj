@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { Star, Library, CloudRainIcon, Palmtree, Building } from 'lucide-react';
+import { Star, Library, CloudRainIcon, Palmtree, Building, CheckCircle } from 'lucide-react';
 
 const categories = [
   { title: "Cafe", icon: Star, description: "Peaceful ambient sounds", type: "SINGLES" },
@@ -74,6 +74,8 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
     elapsedTime: 0,
     isRunning: false
   });
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
 
   const taskListRef = useRef(null);
   const lastTaskRef = useRef(null);
@@ -89,6 +91,12 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
           minutes: newTask.duration.minutes || "0"
         }
       };
+      
+      // If this is the first task and no other tasks are running, start it automatically
+      if (tasks.length === 0 || !tasks.some(task => task.isRunning)) {
+        newTaskWithId.isRunning = true;
+      }
+      
       onTaskUpdate([...tasks, newTaskWithId]);
       console.log("New task added:", newTaskWithId);
       setNewTask({
@@ -124,25 +132,90 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
   const handleDeleteTask = (id) => {
     const updatedTasks = tasks.filter(task => task.id !== id);
     onTaskUpdate(updatedTasks);
+    
+    // If we deleted a running task and there are other tasks, start the next one
+    const deletedTask = tasks.find(task => task.id === id);
+    if (deletedTask && deletedTask.isRunning && updatedTasks.length > 0) {
+      startNextTask(updatedTasks);
+    }
   };
 
   const handleStartStop = (id) => {
-    const updatedTasks = tasks.map(task => 
-      task.id === id ? { ...task, isRunning: !task.isRunning } : task
+    // Stop all tasks first
+    const allStopped = tasks.map(task => ({ ...task, isRunning: false }));
+    
+    // Then start the selected one
+    const updatedTasks = allStopped.map(task => 
+      task.id === id ? { ...task, isRunning: true } : task
     );
+    
     onTaskUpdate(updatedTasks);
+  };
+
+  const startNextTask = (currentTasks) => {
+    if (currentTasks.length === 0) return;
+    
+    // Find the first uncompleted task and start it
+    const updatedTasks = [...currentTasks];
+    updatedTasks[0].isRunning = true;
+    onTaskUpdate(updatedTasks);
+  };
+
+  const completeTask = (task) => {
+    // Add to completed tasks
+    setCompletedTasks(prev => [...prev, {...task, completedAt: new Date()}]);
+    
+    // Remove from current tasks
+    const updatedTasks = tasks.filter(t => t.id !== task.id);
+    
+    // If there are more tasks, start the next one
+    if (updatedTasks.length > 0) {
+      const nextTasks = [...updatedTasks];
+      nextTasks[0].isRunning = true;
+      onTaskUpdate(nextTasks);
+    } else {
+      onTaskUpdate([]);
+    }
   };
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const updatedTasks = tasks.map(task => 
-        task.isRunning ? { ...task, elapsedTime: task.elapsedTime + 1 } : task
-      );
-      onTaskUpdate(updatedTasks);
+      let taskCompleted = false;
+      
+      const updatedTasks = tasks.map(task => {
+        if (task.isRunning) {
+          const newElapsedTime = task.elapsedTime + 1;
+          
+          // Check if task is completed
+          const taskDurationInSeconds = (parseInt(task.duration.hours) * 3600) + (parseInt(task.duration.minutes) * 60);
+          
+          if (newElapsedTime >= taskDurationInSeconds && taskDurationInSeconds > 0) {
+            // Task is completed
+            taskCompleted = task;
+            return task; // Will be removed in the next step
+          }
+          
+          return { ...task, elapsedTime: newElapsedTime };
+        }
+        return task;
+      });
+      
+      if (taskCompleted) {
+        completeTask(taskCompleted);
+      } else {
+        onTaskUpdate(updatedTasks);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
   }, [tasks, onTaskUpdate]);
+
+  // Ensure a task is always running if there are tasks
+  useEffect(() => {
+    if (tasks.length > 0 && !tasks.some(task => task.isRunning)) {
+      startNextTask(tasks);
+    }
+  }, [tasks]);
 
   useEffect(() => {
     if (isNewTaskAdded && tasks.length > 0 && lastTaskRef.current) {
@@ -150,6 +223,13 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
       setIsNewTaskAdded(false);
     }
   }, [tasks, isNewTaskAdded]);
+
+  // Calculate task progress
+  const getTaskProgress = (task) => {
+    const totalSeconds = (parseInt(task.duration.hours) * 3600) + (parseInt(task.duration.minutes) * 60);
+    if (totalSeconds === 0) return 0;
+    return Math.min(100, (task.elapsedTime / totalSeconds) * 100);
+  };
 
   return (
     <motion.div
@@ -195,34 +275,87 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
             <li
               key={index}
               ref={index === tasks.length - 1 ? lastTaskRef : null}
-              className="flex flex-col mb-4 p-2 border rounded transition-all duration-300"
+              className={`flex flex-col mb-4 p-2 border rounded transition-all duration-300 ${task.isRunning ? 'border-blue-500 bg-blue-50' : ''}`}
             >
               {!isClient || open ? (
                 <>
                   <div className="flex justify-between items-center mb-2">
-                  <span>{task.name}</span>
-                    <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                    <span className="font-medium">{task.name}</span>
+                    <button 
+                      onClick={() => handleDeleteTask(task.id)}
+                      className="text-red-500 text-sm hover:text-red-700"
+                    >
+                      Delete
+                    </button>
                   </div>
-                  <div>Duration: {task.duration.hours}h {task.duration.minutes}m</div>
-                  <div>Breaks: {task.breaks}</div>
-                  <div>Environment: {task.environment}</div>
-                  <button onClick={() => handleStartStop(task.id)}>
-                    {task.isRunning ? 'Stop' : 'Start'}
-                  </button>
-                  <span>{formatTime(task.elapsedTime)}</span>
+                  <div className="text-sm">Duration: {task.duration.hours}h {task.duration.minutes}m</div>
+                  <div className="text-sm">Breaks: {task.breaks || '0'}</div>
+                  <div className="text-sm">Environment: {task.environment}</div>
+                  
+                  {/* Progress bar */}
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 mb-1">
+                    <div 
+                      className="bg-blue-600 h-2.5 rounded-full" 
+                      style={{ width: `${getTaskProgress(task)}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mt-2">
+                    <button 
+                      onClick={() => handleStartStop(task.id)}
+                      className={`px-3 py-1 rounded text-sm ${
+                        task.isRunning 
+                          ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+                          : 'bg-green-500 hover:bg-green-600 text-white'
+                      }`}
+                    >
+                      {task.isRunning ? 'Pause' : 'Start'}
+                    </button>
+                    <span className="text-sm font-mono">{formatTime(task.elapsedTime)}</span>
+                  </div>
                 </>
               ) : (
-                <Image
-                  src="/homework-svgrepo-com.svg"
-                  alt="Homework icon"
-                  width={24}
-                  height={24}
-                  priority
-                />
+                <div className="flex items-center justify-center">
+                  {task.isRunning ? (
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  ) : (
+                    <Image
+                      src="/homework-svgrepo-com.svg"
+                      alt="Homework icon"
+                      width={24}
+                      height={24}
+                      priority
+                    />
+                  )}
+                </div>
               )}
             </li>
           ))}
         </ul>
+        
+        {/* Completed tasks section */}
+        {open && completedTasks.length > 0 && (
+          <div className="mt-4 border-t pt-2">
+            <button 
+              onClick={() => setShowCompletedTasks(!showCompletedTasks)}
+              className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+            >
+              <CheckCircle size={16} className="mr-1" />
+              {showCompletedTasks ? 'Hide' : 'Show'} completed tasks ({completedTasks.length})
+            </button>
+            
+            {showCompletedTasks && (
+              <ul className="mt-2 opacity-70">
+                {completedTasks.map((task, index) => (
+                  <li key={index} className="flex justify-between items-center py-1 text-sm">
+                    <span>{task.name}</span>
+                    <span className="text-xs">{formatTime(task.elapsedTime)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
 
       {open && (
@@ -294,7 +427,6 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
     </motion.div>
   );
 };
-
 
 function formatTime(seconds) {
   const hours = Math.floor(seconds / 3600);
