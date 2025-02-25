@@ -49,7 +49,7 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
   // Initialize and handle the background ambience audio
   useEffect(() => {
     if (ambienceAudioRef.current) {
-      ambienceAudioRef.current.src = "/libraryAmbience.mp3";
+      ambienceAudioRef.current.src = "/rainfallAmbience.mp3";
       ambienceAudioRef.current.loop = true; // Loop the ambience
       ambienceAudioRef.current.volume = ambienceVolume;
       
@@ -178,7 +178,7 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
       {/* Background Image */}
       <div className="fixed inset-0 w-full h-full">
         <Image
-          src="/libraryImg.jpg"
+          src="/rainfall.jpg"
           alt="Cozy café interior"
           layout="fill"
           objectFit="cover"
@@ -196,7 +196,7 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
           {/* Timer-like display for track info */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-light text-white mb-4">
-              Study Environment: Library
+              Study Environment: Beach
             </h1>
             {currentTrack && (
               <div className="text-white/90">
