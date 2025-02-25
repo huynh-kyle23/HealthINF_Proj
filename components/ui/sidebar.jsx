@@ -4,6 +4,8 @@ import React, { useState, createContext, useContext, useRef, useEffect } from "r
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { Star, Library, CloudRainIcon, Palmtree, Building, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
 
 const categories = [
   { title: "Cafe", icon: Star, description: "Peaceful ambient sounds", type: "ENVIRONMENTS" },
@@ -66,6 +68,7 @@ export const Sidebar = ({ children, open, setOpen, animate }) => {
 
 export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
   const { open, setOpen, animate, isClient } = useSidebar();
+  const router = useRouter();
   const [newTask, setNewTask] = useState({
     name: "",
     duration: { hours: "", minutes: "" },
@@ -80,6 +83,10 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
   const taskListRef = useRef(null);
   const lastTaskRef = useRef(null);
   const [isNewTaskAdded, setIsNewTaskAdded] = useState(false);
+
+  const navigateToEnvironment = (environment) => {
+    router.push(`/categories/${environment.toLowerCase()}`);
+  };
 
   const handleAddTask = () => {
     if (newTask.name.trim() !== "") {
@@ -173,10 +180,19 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
       const nextTasks = [...updatedTasks];
       nextTasks[0].isRunning = true;
       onTaskUpdate(nextTasks);
+      if (nextTasks[0].environment !== task.environment) {
+        navigateToEnvironment(nextTasks[0].environment);
+      }
     } else {
       onTaskUpdate([]);
     }
   };
+
+  useEffect(() => {
+    if (tasks.length > 0 && tasks[0].isRunning) {
+      navigateToEnvironment(tasks[0].environment);
+    }
+  }, [tasks]);
 
   useEffect(() => {
     const timer = setInterval(() => {
