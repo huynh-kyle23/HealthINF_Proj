@@ -106,12 +106,6 @@ export default function CategoriesLayout({ children }) {
                 gaugePrimaryColor="rgb(79 70 229)"
                 gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
               />
-              {totalSeconds > 0 && (
-                <div className="mt-1 text-xs text-gray-600">
-                  {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / 
-                  {Math.floor(totalSeconds / 60)}:{(totalSeconds % 60).toString().padStart(2, '0')}
-                </div>
-              )}
             </div>
           </div>
           {React.cloneElement(children, { 
