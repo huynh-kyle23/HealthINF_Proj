@@ -6,11 +6,11 @@ import Image from "next/image";
 import { Star, Library, CloudRainIcon, Palmtree, Building, CheckCircle } from 'lucide-react';
 
 const categories = [
-  { title: "Cafe", icon: Star, description: "Peaceful ambient sounds", type: "SINGLES" },
-  { title: "Library", icon: Library, description: "Focus-enhancing tracks", type: "SINGLES" },
-  { title: "Rainfall Bedroom", icon: CloudRainIcon, description: "Calming atmospheres", type: "SINGLES" },
-  { title: "Beach", icon: Palmtree, description: "Restful soundscapes", type: "PLANS" },
-  { title: "Foundations", icon: Building, description: "Basic techniques", type: "PLANS" }
+  { title: "Cafe", icon: Star, description: "Peaceful ambient sounds", type: "ENVIRONMENTS" },
+  { title: "Library", icon: Library, description: "Focus-enhancing tracks", type: "ENVIRONMENTS" },
+  { title: "Rainfall Bedroom", icon: CloudRainIcon, description: "Calming atmospheres", type: "ENVIRONMENTS" },
+  { title: "Beach", icon: Palmtree, description: "Restful soundscapes", type: "ENVIRONMENTS" },
+  { title: "Foundations", icon: Building, description: "Basic techniques", type: "ENVIRONMENTS" }
 ];
 
 const SidebarContext = createContext(undefined);

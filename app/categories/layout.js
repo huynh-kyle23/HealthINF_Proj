@@ -1,7 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Sidebar, SidebarBody } from "../../components/ui/sidebar";
 import {AnimatedCircularProgressBar} from "../../components/magicui/animated-circular-progress-bar";
+
+export const TaskContext = createContext();
+
 
 export default function CategoriesLayout({ children }) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -86,6 +89,8 @@ export default function CategoriesLayout({ children }) {
         console.log("Tasks updated:", total_seconds, "Elapsed Time:", total_elapsed_time);
       }
     };
+
+
   
     return (
       <div style={{ display: "flex", height: "100vh" }}>
@@ -95,6 +100,13 @@ export default function CategoriesLayout({ children }) {
         >
           <SidebarBody tasks={tasks} onTaskUpdate={handleTaskUpdate} />
         </Sidebar>
+        <TaskContext.Provider value={{ 
+        tasks, 
+        onTaskUpdate: handleTaskUpdate,
+        progressValue: value,
+        totalSeconds,
+        elapsedSeconds
+      }}>
         
         <main style={{ flex: 1, padding: "2rem", fontFamily: "sans-serif", position: "relative" }}>
           <div className="absolute top-4 right-4 z-20">
@@ -106,6 +118,12 @@ export default function CategoriesLayout({ children }) {
                 gaugePrimaryColor="rgb(79 70 229)"
                 gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
               />
+              {totalSeconds > 0 && (
+                <div className="mt-1 text-xs text-gray-600">
+                  {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / 
+                  {Math.floor(totalSeconds / 60)}:{(totalSeconds % 60).toString().padStart(2, '0')}
+                </div>
+              )}
             </div>
           </div>
           {React.cloneElement(children, { 
@@ -116,6 +134,7 @@ export default function CategoriesLayout({ children }) {
             elapsedSeconds: elapsedSeconds
           })}
         </main>
+        </TaskContext.Provider>
       </div>
     );
   }
