@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { AnimatedCircularProgressBar } from "../../../components/magicui/animated-circular-progress-bar";
-
-import Image from "next/image"
+import Image from "next/image";
 
 export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
   const [value, setValue] = useState(0);
@@ -12,9 +10,18 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
   const [error, setError] = useState(null);
   const [isUserInitiated, setIsUserInitiated] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
+  
+  // New state for volume control
+  const [musicVolume, setMusicVolume] = useState(0.7);
+  const [ambienceVolume, setAmbienceVolume] = useState(0.5);
+  const [showMixer, setShowMixer] = useState(false);
+  
+  // Refs for audio elements
+  const musicAudioRef = useRef(null);
+  const ambienceAudioRef = useRef(null);
 
   const clientId = process.env.NEXT_PUBLIC_API_KEY;
+  
   useEffect(() => {
     async function fetchTracks() {
       try {
@@ -37,17 +44,49 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
       }
     }
     fetchTracks();
-  }, []);
+  }, [clientId]);
 
+  // Initialize and handle the background ambience audio
   useEffect(() => {
-    if (audioRef.current && tracks.length > 0) {
-      audioRef.current.src = tracks[currentTrackIndex].audio;
-      audioRef.current.load();
+    if (ambienceAudioRef.current) {
+      ambienceAudioRef.current.src = "/cafeAmbience.mp3";
+      ambienceAudioRef.current.loop = true; // Loop the ambience
+      ambienceAudioRef.current.volume = ambienceVolume;
+      
+      // Play ambience when user has initiated audio
       if (isUserInitiated) {
-        audioRef.current.play().catch((err) => console.error("Play failed:", err));
+        ambienceAudioRef.current.play().catch(err => console.error("Ambience play failed:", err));
       }
     }
-  }, [currentTrackIndex, tracks.length]);
+  }, [isUserInitiated]);
+
+  // Update music track when current track changes
+  useEffect(() => {
+    if (musicAudioRef.current && tracks.length > 0) {
+      musicAudioRef.current.src = tracks[currentTrackIndex].audio;
+      musicAudioRef.current.load();
+      musicAudioRef.current.volume = musicVolume;
+      if (isUserInitiated && isPlaying) {
+        musicAudioRef.current.play().catch((err) => {
+          if (err.name !== "AbortError") {
+            console.error("Music play failed:", err);
+          }
+        });      }
+    }
+  }, [currentTrackIndex, tracks.length, isUserInitiated, isPlaying]);
+
+  // Update volume when sliders change
+  useEffect(() => {
+    if (musicAudioRef.current) {
+      musicAudioRef.current.volume = musicVolume;
+    }
+  }, [musicVolume]);
+  
+  useEffect(() => {
+    if (ambienceAudioRef.current) {
+      ambienceAudioRef.current.volume = ambienceVolume;
+    }
+  }, [ambienceVolume]);
 
   useEffect(() => {
     const handleIncrement = (prev) => {
@@ -61,24 +100,34 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
     return () => clearInterval(interval);
   }, []);
 
-  
-
   const handlePlay = () => {
-    if (audioRef.current) {
-      audioRef.current
+    if (musicAudioRef.current && ambienceAudioRef.current) {
+      // Play both audio sources
+      musicAudioRef.current
         .play()
-        .then(() => setIsUserInitiated(true))
+        .then(() => {
+          setIsUserInitiated(true);
+          setIsPlaying(true);
+          // Once user has initiated audio, we can start the ambience too
+          ambienceAudioRef.current.play().catch(err => console.error("Ambience play failed:", err));
+        })
         .catch((err) => console.error("Play failed:", err));
     }
   };
 
   const handlePlayPause = () => {
-    if (audioRef.current) {
+    if (musicAudioRef.current) {
       if (isPlaying) {
-        audioRef.current.pause();
+        musicAudioRef.current.pause();
       } else {
-        audioRef.current.play()
-          .then(() => setIsUserInitiated(true))
+        musicAudioRef.current.play()
+          .then(() => {
+            setIsUserInitiated(true);
+            // Only start the ambience if it's not already playing
+            if (ambienceAudioRef.current && !isUserInitiated) {
+              ambienceAudioRef.current.play().catch(err => console.error("Ambience play failed:", err));
+            }
+          })
           .catch((err) => console.error("Play failed:", err));
       }
       setIsPlaying(!isPlaying);
@@ -97,6 +146,10 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
     );
   };
 
+  const toggleMixer = () => {
+    setShowMixer(!showMixer);
+  };
+
   if (loading) {
     return <div>Loading Jamendo tracks...</div>;
   }
@@ -109,6 +162,19 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
 
   return (
     <div className="relative min-h-screen w-full">
+      {/* Background ambience audio */}
+      <audio 
+        ref={ambienceAudioRef} 
+        className="hidden"
+      />
+      
+      {/* Music player audio */}
+      <audio 
+        ref={musicAudioRef}
+        className="hidden"
+        onEnded={handleNextTrack}
+      />
+
       {/* Background Image */}
       <div className="fixed inset-0 w-full h-full">
         <Image
@@ -148,20 +214,12 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
 
           {/* Audio Controls */}
           <div className="flex flex-col items-center gap-6">
-            <audio 
-              controls={false}
-              ref={audioRef}
-              className="hidden"
-              onEnded={handleNextTrack}
-            >
-              Your browser does not support the audio element.
-            </audio>
-
             {/* Custom Controls */}
             <div className="flex items-center gap-6">
               <button
                 onClick={handlePrevTrack}
                 className="text-white hover:text-white/75 transition-colors p-3 rounded-full bg-white/20 hover:bg-white/30"
+                aria-label="Previous track"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 20L9 12L19 4V20Z M5 19V5" />
@@ -171,6 +229,7 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
               <button
                 onClick={handlePlayPause}
                 className="text-white hover:text-white/75 transition-colors p-4 rounded-full bg-white/20 hover:bg-white/30"
+                aria-label={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2">
@@ -186,12 +245,62 @@ export default function JamendoPlayer({ tasks = [], onTaskUpdate = () => {} }) {
               <button
                 onClick={handleNextTrack}
                 className="text-white hover:text-white/75 transition-colors p-3 rounded-full bg-white/20 hover:bg-white/30"
+                aria-label="Next track"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 4L15 12L5 20V4Z M19 5V19" />
                 </svg>
               </button>
             </div>
+            
+            {/* Audio Mixer Button */}
+            <button
+              onClick={toggleMixer}
+              className="mt-4 text-white hover:text-white/75 transition-colors px-4 py-2 rounded-full bg-white/20 hover:bg-white/30"
+            >
+              {showMixer ? "Hide Mixer" : "Show Mixer"}
+            </button>
+            
+            {/* Audio Mixer Panel */}
+            {showMixer && (
+              <div className="mt-6 w-full bg-black/30 backdrop-blur-md rounded-lg p-6">
+                <h3 className="text-white text-lg font-medium mb-4">Audio Mixer</h3>
+                
+                {/* Music Volume Control */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-white/80 text-sm mb-1">
+                    <span>Music</span>
+                    <span>{Math.round(musicVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={musicVolume}
+                    onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                {/* Ambience Volume Control */}
+                <div>
+                  <div className="flex justify-between text-white/80 text-sm mb-1">
+                    <span>Café Ambience</span>
+                    <span>{Math.round(ambienceVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={ambienceVolume}
+                    onChange={(e) => setAmbienceVolume(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
