@@ -317,16 +317,6 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
                   </div>
                   
                   <div className="flex justify-between items-center mt-2">
-                    <button 
-                      onClick={() => handleStartStop(task.id)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        task.isRunning 
-                          ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
-                          : 'bg-green-500 hover:bg-green-600 text-white'
-                      }`}
-                    >
-                      {task.isRunning ? 'Pause' : 'Start'}
-                    </button>
                     <span className="text-sm font-mono">{formatTime(task.elapsedTime)}</span>
                   </div>
                 </>
