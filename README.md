@@ -10,9 +10,6 @@ Lofi Cafe is a web application designed to enhance study sessions with customiza
 - 🔄 **Smooth Transitions** - A seamless user experience with animated effects.
 - 🎓 **Trusted by Students & Professionals** - Recommended by learners worldwide.
 
-## 📸 Screenshots
-
-![Lofi Cafe Preview](./preview.png)
 
 ## 🚀 Getting Started
 
