@@ -30,12 +30,12 @@ const categories = [
     description: "Restful soundscapes",
     type: "ENVIRONMENTS"
   },
-  {
-    title: "Foundations",
-    icon: Building,
-    description: "Basic techniques",
-    type: "ENVIRONMENTS"
-  }
+  // {
+  //   title: "About Us",
+  //   icon: Building,
+  //   description: "Basic techniques",
+  //   type: "ENVIRONMENTS"
+  // }
 ];
 
 export default function StudySettingsGrid() {
@@ -54,7 +54,6 @@ export default function StudySettingsGrid() {
     <div className="w-full max-w-4xl mx-auto p-4">
       {/* Section Headers for SINGLES */}
       <div className="mb-4">
-        <h2 className="text-sm text-gray-500 font-medium mb-4">ENVIRONMENTS</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {categories
             .filter((cat) => cat.type === "ENVIRONMENTS")
