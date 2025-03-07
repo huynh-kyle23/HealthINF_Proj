@@ -1,10 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useTheme } from "next-themes";
 import StudySettingsGrid from "../components/Grid";
 import StudyEnvironmentCarousel from "../components/CarouselImg";
-import { HoverEffect } from "../components/ui/card-hover-effect"
-import { RippleButton } from "../components/magicui/ripple-button"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
