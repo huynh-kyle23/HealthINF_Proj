@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import StudySettingsGrid from "../components/Grid";
 import StudyEnvironmentCarousel from "../components/CarouselImg";
+import {AnimatedListDemo} from '../components/features_list';
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -46,7 +47,6 @@ export default function Home() {
                 studying.
                 Enhance your study sessions with customizable ambient soundscapes.
                 Find your flow state with Lofi Cafe's immersive audio environments.
-
               </p>
               
               <div className="flex flex-wrap gap-4">
@@ -59,9 +59,37 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Features Section */}
+          <div className={`grid md:grid-cols-2 gap-12 mb-16 transition-all duration-700 delay-700 ${isLoaded ? 'opacity-100 transform-none' : 'opacity-0 translate-y-8'}`}>
+            {/* Animated List Demo */}
+            <div>
+              <AnimatedListDemo />
+            </div>
+            {/* Notable Features Description */}
+            <div className="flex flex-col justify-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">Notable Features</h2>
+              <p className="text-gray-600 mb-6">
+                Our extensive user research of UCI undergraduate students revealed that many struggle with 
+                maintaining focus during study sessions. We identified key pain points including distracting environments, 
+                difficulty getting into a flow state, and burnout from extended study periods.
+              </p>
+              <p className="text-gray-600 mb-6">
+                Based on this research, we've carefully crafted Lofi Cafe to address these specific challenges.
+                Our platform incorporates evidence-based audio techniques that have been shown to improve concentration
+                and reduce anxiety, creating the optimal conditions for deep focus and effective learning.
+              </p>
+              <div className="flex items-center gap-3 mt-2">
+                <div className="h-1 w-16 bg-amber-400 rounded-full"></div>
+                <span className="text-amber-600 font-medium">Designed with students, for students</span>
+              </div>
+            </div>
+            
+
+          </div>
+
           {/* Study Settings Grid */}
           <div className={`transition-all duration-700 delay-700 ${isLoaded ? 'opacity-100 transform-none' : 'opacity-0 translate-y-8'}`}>
-            <h2 className="text-xl font-medium text-gray-700 mb-6">ENVIRONMENTS</h2>
+            <h2 className="text-xl font-medium text-gray-700 mb-6">TRY OUT ONE OF OUR ENVIRONMENTS</h2>
             <StudySettingsGrid />
           </div>
 
