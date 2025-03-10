@@ -426,7 +426,7 @@ export default function JamendoPlayer() {
         <div className="w-full max-w-2xl bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
           {/* Timer-like display for track info */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-light text-white mb-4">lofi café</h1>
+            <h1 className="text-4xl font-light text-white mb-4">lofi beach</h1>
             
             {/* Break status indicator */}
             {isOnBreak && (
@@ -586,7 +586,7 @@ export default function JamendoPlayer() {
                 {/* Ambience Volume Control */}
                 <div>
                   <div className="flex justify-between text-white/80 text-sm mb-1">
-                    <span>Café Ambience</span>
+                    <span>Beach Ambience</span>
                     <span>{Math.round(ambienceVolume * 100)}%</span>
                   </div>
                   <input

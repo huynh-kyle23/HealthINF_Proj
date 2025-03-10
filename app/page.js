@@ -42,7 +42,11 @@ export default function Home() {
               </h2>
               
               <p className="text-gray-600 mb-8">
-                Enhance your study sessions with customizable ambient soundscapes. Find your flow state with Lofi Cafe's immersive audio environments.
+                Aimed to aid college students that struggle with deep focus and effective
+                studying.
+                Enhance your study sessions with customizable ambient soundscapes.
+                Find your flow state with Lofi Cafe's immersive audio environments.
+
               </p>
               
               <div className="flex flex-wrap gap-4">
