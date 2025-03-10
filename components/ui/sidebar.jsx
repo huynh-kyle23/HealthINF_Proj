@@ -12,7 +12,6 @@ const categories = [
   { title: "Library", icon: Library, description: "Focus-enhancing tracks", type: "ENVIRONMENTS" },
   { title: "Rainfall Bedroom", icon: CloudRainIcon, description: "Calming atmospheres", type: "ENVIRONMENTS" },
   { title: "Beach", icon: Palmtree, description: "Restful soundscapes", type: "ENVIRONMENTS" },
-  { title: "Foundations", icon: Building, description: "Basic techniques", type: "ENVIRONMENTS" }
 ];
 
 const SidebarContext = createContext(undefined);
@@ -85,7 +84,7 @@ export const SidebarBody = ({ tasks, onTaskUpdate, ...props }) => {
   const [isNewTaskAdded, setIsNewTaskAdded] = useState(false);
 
   const navigateToEnvironment = (environment) => {
-    router.push(`/categories/${environment.toLowerCase()}`);
+    router.push(`/categories/${environment.toLowerCase().replace(/\s+/g, "-")}`);
   };
 
   const handleAddTask = () => {
