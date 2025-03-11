@@ -543,7 +543,7 @@ export default function JamendoPlayer() {
                 onClick={endBreak}
                 className="mt-2 text-white hover:text-white/75 transition-colors px-4 py-2 rounded-full bg-blue-500/70 hover:bg-blue-600"
               >
-                End Break Early
+                End Break
               </button>
             )}
 
