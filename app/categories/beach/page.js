@@ -14,10 +14,10 @@ export default function JamendoPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Audio volume states
-  const [musicVolume, setMusicVolume] = useState(0.3); // Lower default music volume
-  const [ambienceVolume, setAmbienceVolume] = useState(0.7); // Higher default ambience volume
-  const [targetMusicVolume, setTargetMusicVolume] = useState(0.3); // Target volumes for transitions
-  const [targetAmbienceVolume, setTargetAmbienceVolume] = useState(0.7);
+  const [musicVolume, setMusicVolume] = useState(0.7); // Lower default music volume
+  const [ambienceVolume, setAmbienceVolume] = useState(0.3); // Higher default ambience volume
+  const [targetMusicVolume, setTargetMusicVolume] = useState(0.2); // Target volumes for transitions
+  const [targetAmbienceVolume, setTargetAmbienceVolume] = useState(0.8);
   const [showMixer, setShowMixer] = useState(false);
 
   // Break management states
